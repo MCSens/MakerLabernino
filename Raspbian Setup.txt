@@ -1,0 +1,54 @@
+1. OS Updaten
+sudo update
+
+2. Repos von Git Hub laden
+	Terminal öffnen
+	git dasjaoajo
+
+2. OS konfigurieren
+sudo raspi-config
+	1. Sprache umschalten über INternalisation
+	2. SSH einschalten
+	3. Boot in Desktop ermöglichen
+
+3. WLAN konfigurieren
+sudo nano /etc/network/interfaces
+	auto wlan0
+
+	iface lo inet loopback
+	iface eth0 inet dhcp
+
+	allow-hotplug wlan0
+	iface wlan0 inet dhcp
+	wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
+	iface default inet dhcp
+
+	allow-hotplug wlan1
+	iface wlan1 inet dhcp
+
+sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
+	network={
+		ssid="Linksys"
+        	psk="abc123"
+		key_mgmt=WPA-PSK
+	}
+
+4. Remotedesktop ermöglichen
+sudo apt-get install tightvncserver
+sudo apt-get install xrdp
+
+5. Developer Tools installieren
+sudo pip install azure
+sudo pip install RPi.GPIO
+
+
+sudo apt-get --assume-yes update
+sudo apt-get --assume-yes install freetds-dev freetds-bin
+sudo apt-get --assume-yes install python-dev python-pip
+sudo pip install pymssql==2.1.1
+ERROR : Cannot import IncompleteRead
+SOLUTION: Check if python-requests is installed by:
+		sudo dpkg -l | grep python-requests
+		sudo apt-get remove python-pip
+		sudo easy_install pip
+
