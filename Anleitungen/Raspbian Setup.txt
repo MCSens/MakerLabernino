@@ -2,14 +2,14 @@
 sudo update
 
 2. Repos von Git Hub laden
-	Terminal öffnen
+	Terminal Ã¶ffnen
 	git dasjaoajo
 
 2. OS konfigurieren
 sudo raspi-config
-	1. Sprache umschalten über INternalisation
+	1. Sprache umschalten Ã¼ber INternalisation
 	2. SSH einschalten
-	3. Boot in Desktop ermöglichen
+	3. Boot in Desktop ermÃ¶glichen
 
 3. WLAN konfigurieren
 sudo nano /etc/network/interfaces
@@ -33,7 +33,7 @@ sudo nano /etc/wpa_supplicant/wpa_supplicant.conf
 		key_mgmt=WPA-PSK
 	}
 
-4. Remotedesktop ermöglichen
+4. Remotedesktop ermÃ¶glichen
 sudo apt-get install tightvncserver
 sudo apt-get install xrdp
 
