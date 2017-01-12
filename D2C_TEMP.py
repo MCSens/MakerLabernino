@@ -86,9 +86,9 @@ class TempReader:
 
     
 if __name__ == '__main__':
-    connectionString = 'HostName=IoT-Hub-Wind.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=RO/nAkbuTn8LxGeMYO9WmYzK4DTsMm6GlAvNM7dZ98o='
+    connectionString = 'connection_String_from_Azure'
     d2cMsgSender = D2CMsgSender(connectionString)
-    deviceId = 'raspberry_python'
+    deviceId = 'iot_pi_1'
 
     while True:
         tempSensor = TempReader()
