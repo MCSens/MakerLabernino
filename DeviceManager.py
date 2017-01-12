@@ -70,7 +70,8 @@ class DeviceManager:
 if __name__ == '__main__':
     connectionString = 'connection_string_from_azure'
     dm = DeviceManager(connectionString)
-    deviceId = 'raspberry_python'
+    deviceId = 'iot_pi_1'
+    
     print dm.createDeviceId(deviceId)
     print dm.retrieveDeviceId(deviceId)
     print dm.listDeviceIds()
