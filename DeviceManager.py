@@ -68,12 +68,9 @@ class DeviceManager:
         return r.text, r.status_code
         
 if __name__ == '__main__':
-    connectionString = 'connection_string_from_azure'
-    deviceId = 'iot_pi_1'
-    
-    dm = DeviceManager(connectionString)    
+    connectionString = 'HostName=IoT-Makerlab-Hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=8gtw3MG9uzf+Jy5w8uErrg3hVStY/vMHZO43An1DieA='
+    dm = DeviceManager(connectionString)
+    deviceId = 'IOT-GNS-Temperature-2'
     print dm.createDeviceId(deviceId)
     print dm.retrieveDeviceId(deviceId)
     print dm.listDeviceIds()
-
-    //HostName=IoT-Makerlab-Hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=8gtw3MG9uzf+Jy5w8uErrg3hVStY/vMHZO43An1DieA=

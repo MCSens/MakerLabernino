@@ -10,26 +10,27 @@ THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
 EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED 
 WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 """
+
 from json import JSONEncoder
+import time #to get timestamp
+import datetime #to convert timestamp to SQL Date
 import base64
 import hmac
 import hashlib
-import time
 import requests
 import urllib
 import os
 import glob
 import time
+import RPi.GPIO as GPIO
 
-os.system('modprobe w1-gpio')
-os.system('modprobe w1-therm')
 
 class D2CMsgSender:
     
     API_VERSION = '2016-02-03'
     TOKEN_VALID_SECS = 10
     TOKEN_FORMAT = 'SharedAccessSignature sig=%s&se=%s&skn=%s&sr=%s'
-
+    
     def __init__(self, connectionString=None):
         if connectionString != None:
             iotHost, keyName, keyValue = [sub[sub.index('=') + 1:] for sub in connectionString.split(";")]
@@ -58,46 +59,45 @@ class D2CMsgSender:
         url = 'https://%s/devices/%s/messages/events?api-version=%s' % (self.iotHost, deviceId, self.API_VERSION)
         r = requests.post(url, headers={'Authorization': sasToken}, data=message)
         return r.text, r.status_code
-
-class TempReader:
-
-    base_dir = '/sys/bus/w1/devices/'
-    device_folder = glob.glob(base_dir + '28*')[0]
-    device_file = device_folder + '/w1_slave'
     
-    def read_temp_raw(self):
-        f = open(self.device_file, 'r')
-        lines = f.readlines()
-        f.close()
-        return lines
-
-    def read_temp(self):
-        lines = self.read_temp_raw()
-        while lines[0].strip()[-3:] != 'YES':
-            time.sleep(0.2)
-            lines = self.read_temp_raw()
-        equals_pos = lines[1].find('t=')
-        if equals_pos != -1:
-            temp_string = lines[1][equals_pos+2:]
-            temp_c = float(temp_string) / 1000.0
-            return temp_c
-            #temp_f = temp_c * 9.0 / 5.0 + 32.0
-            #return temp_c, temp_f
-
-    
+    def read_pir(self):
+        GPIO.setup(10, GPIO.IN)
+        GPIO.setup(3, GPIO.OUT)
+        GPIO.input(10)
+		
 if __name__ == '__main__':
-    connectionString = 'HostName=IoT-Hub-Wind.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=RO/nAkbuTn8LxGeMYO9WmYzK4DTsMm6GlAvNM7dZ98o='
+    connectionString = 'HostName=IoT-Makerlab-Hub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=8gtw3MG9uzf+Jy5w8uErrg3hVStY/vMHZO43An1DieA='
     d2cMsgSender = D2CMsgSender(connectionString)
-    deviceId = 'raspberry_python'
+    room = 'iot_maker_01'
+    deviceId = "raspberry_python"
+    
+    GPIO.setwarnings(False)
+    GPIO.setmode(GPIO.BOARD)
 
-    while True:
-        tempSensor = TempReader()
-        temperature = tempSensor.read_temp()
-        jsonString = JSONEncoder().encode({
-            "temperature": temperature 
-        })
-        print jsonString
-        message = jsonString
-        print d2cMsgSender.sendD2CMsg(deviceId, message)
-        time.sleep(5)
-
+    GPIO.setup(10, GPIO.IN)
+    GPIO.setup(3, GPIO.OUT)
+    
+    occ_old = GPIO.input(10)
+    try:
+        while True:
+            occ=GPIO.input(10)
+            if(occ_old != occ):
+                print "Status geaendert"
+                if occ==0:                 #When output from motion sensor is LOW
+                    print "No intruders",occ
+                    GPIO.output(3, GPIO.LOW)
+                elif occ==1:               #When output from motion sensor is HIGH
+                    print "Intruder detected",occ
+                    GPIO.output(3,GPIO.HIGH)
+                time_seconds = time.time()
+                timestamp = datetime.datetime.fromtimestamp(time_seconds).strftime('%Y-%m-%d %H:%M:%S')
+                jsonString = JSONEncoder().encode({
+                    "room" : room, 
+                    "occupied": occ,
+                    "timestamp": timestamp
+                })
+                d2cMsgSender.sendD2CMsg(deviceId, jsonString)
+                occ_old = occ
+                time.sleep(0.2)
+    except:
+        GPIO.output(3, GPIO.LOW)

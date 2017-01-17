@@ -15,14 +15,13 @@ import base64
 import hmac
 import hashlib
 import time
+import datetime
 import requests
 import urllib
 import os
 import glob
 import time
 
-os.system('modprobe w1-gpio')
-os.system('modprobe w1-therm')
 
 class D2CMsgSender:
     
@@ -59,45 +58,41 @@ class D2CMsgSender:
         r = requests.post(url, headers={'Authorization': sasToken}, data=message)
         return r.text, r.status_code
 
-class TempReader:
+class TempHumReader:
 
-    base_dir = '/sys/bus/w1/devices/'
-    device_folder = glob.glob(base_dir + '28*')[0]
-    device_file = device_folder + '/w1_slave'
-    
-    def read_temp_raw(self):
-        f = open(self.device_file, 'r')
-        lines = f.readlines()
-        f.close()
-        return lines
+    def read_data(self):
+        #Reads the sensor data of the DHT22
+        #and returns a temperature and a humidity value
 
-    def read_temp(self):
-        lines = self.read_temp_raw()
-        while lines[0].strip()[-3:] != 'YES':
-            time.sleep(0.2)
-            lines = self.read_temp_raw()
-        equals_pos = lines[1].find('t=')
-        if equals_pos != -1:
-            temp_string = lines[1][equals_pos+2:]
-            temp_c = float(temp_string) / 1000.0
-            return temp_c
-            #temp_f = temp_c * 9.0 / 5.0 + 32.0
-            #return temp_c, temp_f
-
+        #TBD
+        temperature_fahrenheit = 60 #Real Sensor Data
+        humidity = 50 #Real Sensor Data
+        
+        return temperature_fahrenheit, humidity
     
 if __name__ == '__main__':
-    connectionString = 'HostName=IoT-Hub-Wind.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=RO/nAkbuTn8LxGeMYO9WmYzK4DTsMm6GlAvNM7dZ98o='
+    connectionString = 'HostName=TempHumHub.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=qiAPlJiP0KfKHXoTP1/3A8x3YF7PC6jPBa9HrH6HIiQ='
     d2cMsgSender = D2CMsgSender(connectionString)
-    deviceId = 'raspberry_python'
+    deviceId = 'IOT-GNS-Temperature-2'
 
-    while True:
-        tempSensor = TempReader()
-        temperature = tempSensor.read_temp()
-        jsonString = JSONEncoder().encode({
-            "temperature": temperature 
-        })
-        print jsonString
-        message = jsonString
-        print d2cMsgSender.sendD2CMsg(deviceId, message)
-        time.sleep(5)
+    try:
+        while True:
+            tempHumSensor = TempHumReader()
+            temperature_fahrenheit, humidity = tempHumSensor.read_data()
 
+            time_seconds = time.time()
+            timestamp = datetime.datetime.fromtimestamp(time_seconds).strftime('%Y-%m-%d %H:%M:%S')
+     
+            jsonString = JSONEncoder().encode({
+                "rcd_type": "Temp",  #Don't know what this means
+                "source_device":deviceId,
+                "temperature": temperature_fahrenheit,
+                "humidity": humidity,
+                "timestamp":timestamp
+            })
+            print jsonString
+            message = jsonString
+            print d2cMsgSender.sendD2CMsg(deviceId, message)
+            time.sleep(5)
+    except:
+        print "Ende"

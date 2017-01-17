@@ -43,18 +43,10 @@ def switch_led(temp):
     GPIO.setup(pin, GPIO.OUT)
     GPIO.output(pin,GPIO.HIGH)
 
-try:    
-    while True:
-        temp = read_temp()
-        switch_led(temp)
-        print(temp)
-        time.sleep(1)
-        
-except:
-    #Catches all exceptions
-    print('Excpetion occured')
-    GPIO.cleanup()
-    
-finally:
-    GPIO.cleanup()
+while True:
+    temp = read_temp()
+    switch_led(temp)
+    print(temp)
+    time.sleep(1)
+
 

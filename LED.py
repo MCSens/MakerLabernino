@@ -16,11 +16,9 @@ GPIO.output(13,GPIO.HIGH)
 time.sleep(1)
 GPIO.output(13, GPIO.LOW)
 
-
 GPIO.setup(15, GPIO.OUT)
-print("LED AN")
+print("LED GRÜN AN")
 GPIO.output(15,GPIO.HIGH)
 time.sleep(1)
 GPIO.output(15, GPIO.LOW)
-
 
